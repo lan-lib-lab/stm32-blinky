@@ -1,0 +1,12 @@
+# this file is for ripgrep to filter searches
+
+# build output
+*.o
+*.d
+*.lst
+*.sym
+*.map
+
+# tags files
+tags
+
