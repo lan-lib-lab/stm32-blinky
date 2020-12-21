@@ -134,8 +134,8 @@ extern void trap_error(int);
  * simplifies the error handling based on an output parameter and a return error. It turns the error handling
  * logic into an expression so that it can be used simultaneously with other expressions or passed to 
  * function calls. This feature is available for GCC compilers but not for all compilers such as msvc.
- * - ASSERT_EXPECT.* variants are similar but they don't return, they assert a fault.
- * - EXPECT_PASS and EXPECT_TRUE only perform error handling on error return, and no redirection of output params.
+ * - ASSERT.* variants are similar but they don't return, they assert a fault.
+ * - EXPECT_OK and EXPECT_TRUE only perform error handling on error return, and no redirection of output params.
  */
 
 /// warning: this is valid with gcc compilers but may not be supported by some compilers
@@ -154,7 +154,7 @@ extern void trap_error(int);
     res;\
 })
 
-#define ASSERT_EXPECT(func, T, ...) ({\
+#define ASSERT_OUT(func, T, ...) ({\
     T res;\
     int expect_error = (int)func(&res, ##__VA_ARGS__);\
     if (expect_error != 0) {ERROR_ASSERT(expect_error);}\
@@ -172,7 +172,7 @@ extern void trap_error(int);
     res;\
 })
 
-#define ASSERT_EXPECT_S(func, self, T, ...) ({\
+#define ASSERT_S(func, self, T, ...) ({\
     T res;\
     int expect_error = (int)func(self, &res, ##__VA_ARGS__);\
     if (expect_error != 0) {ERROR_ASSERT(expect_error);}\
@@ -187,7 +187,7 @@ extern void trap_error(int);
     res;\
 })
 
-#define ASSERT_EXPECT_OR_REDIR(err, func, T, ...) ({\
+#define ASSERT_OR_REDIR(err, func, T, ...) ({\
     T res;\
     int expect_error = (int)func(&res, ##__VA_ARGS__);\
     if (expect_error != 0) {ERROR_ASSERT(err);}\
@@ -201,7 +201,7 @@ extern void trap_error(int);
     res;\
 })
 
-#define ASSERT_EXPECT_S_OR_REDIR(err, func, self, T, ...) ({\
+#define ASSERT_S_OR_REDIR(err, func, self, T, ...) ({\
     T res;\
     int expect_error = (int)func(self, &res, ##__VA_ARGS__);\
     if (expect_error != 0) {ERROR_ASSERT(err);}\
@@ -217,22 +217,22 @@ extern void trap_error(int);
 })
 
 /// takes an expression that evaluates to an error code such as the return of a function call and ERROR_RETURN its error code if it's not 0
-#define EXPECT_PASS(expr) do{\
+#define EXPECT_OK(expr) do{\
     int expect_error = (int)(expr);\
     if (expect_error != 0) ERROR_RETURN(expect_error);\
 }while(0)
 
-#define ASSERT_EXPECT_PASS(expr) do{\
+#define ASSERT_OK(expr) do{\
     int expect_error = (int)(expr);\
     if (expect_error != 0) ERROR_ASSERT(expect_error);\
 }while(0)
 
-/// like EXPECT_PASS, but in case of error, it ERROR_RETURNs a specified error
-#define EXPECT_PASS_OR_REDIR(expr, output_error_code) do{\
+/// like EXPECT_OK, but in case of error, it ERROR_RETURNs a specified error
+#define EXPECT_OK_OR_REDIR(expr, output_error_code) do{\
     if ((expr) != 0) ERROR_RETURN(output_error_code);\
 }while(0)
 
-#define ASSERT_EXPECT_PASS_OR_REDIR(expr, output_error_code) do{\
+#define ASSERT_OK_OR_REDIR(expr, output_error_code) do{\
     if ((expr) != 0) ERROR_ASSERT(output_error_code);\
 }while(0)
 
@@ -241,7 +241,7 @@ extern void trap_error(int);
     if (!(expr)) ERROR_RETURN(false);\
 }while(0)
 
-#define ASSERT_EXPECT_TRUE(expr) do{\
+#define ASSERT_TRUE(expr) do{\
     if (!(expr)) ERROR_ASSERT(false);\
 }while(0)
 
@@ -250,7 +250,7 @@ extern void trap_error(int);
     if (!(expr)) ERROR_RETURN(output_error_code);\
 }while(0)
 
-#define ASSERT_EXPECT_TRUE_OR_REDIR(expr, output_error_code) do{\
+#define ASSERT_TRUE_OR_REDIR(expr, output_error_code) do{\
     if (!(expr)) ERROR_ASSERT(output_error_code);\
 }while(0)
 

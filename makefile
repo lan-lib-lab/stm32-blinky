@@ -11,13 +11,17 @@ src = $(wildcard src/*.c) $(wildcard src/*/*.c)
 obj = $(patsubst src/%, build/obj/%, $(src:.c=.o))
 dep = $(obj:.o=.d)
 
-libs = $(patsubst lib%, -l%, $(notdir $(basename $(wildcard libs/*.a) $(wildcard libs/*/*.a))))
+libs = $(patsubst lib%, -l%, $(notdir $(basename $(wildcard libs/*.a)\
+ $(wildcard libs/*/*.a))))\
+ # -L"/usr/arm-none-eabi/lib/" -lg -lc
+	
 exec = $(notdir $(CURDIR))
 
 version = 0.1.0
 PROG = $(exec)-$(version)
 
-CFLAGS_INCLUDE_LIB_HEADERS = -Iinc $(patsubst %, -I%, $(dir $(wildcard libs/*/)))
+CFLAGS_INCLUDE_LIB_HEADERS = -Iinc $(patsubst %, -I%, $(dir $(wildcard libs/*/)))\
+	-I"/usr/arm-none-eabi/lib/"
 LDFLAGS_INCLUDE_LIB_DIRS = -Llibs $(patsubst %, -L%, $(dir $(wildcard libs/*/)))
 
 CFLAGS = $(strip -Wall -Wno-main -mthumb $(CFLAGS_INCLUDE_LIB_HEADERS))
@@ -40,7 +44,8 @@ all: build
 .PHONY: build
 build: build_vectors $(obj)
 	@mkdir -p build/
-	$(LD) -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
+	# $(CC) -nostartfiles -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
+	$(LD)  -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
 	$(OBJDUMP) -D build/$(PROG).elf > build/$(PROG).lst
 	$(OBJCOPY) build/$(PROG).elf -O binary build/$(PROG).bin
 
@@ -89,7 +94,7 @@ ifneq (,$(wildcard build/obj/*))
 endif
 
 build/obj/%.o: src/%.c
-	@mkdir -p $(dir  $@)
+	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # rule to generate a dep file by using the C preprocessor

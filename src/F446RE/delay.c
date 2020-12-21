@@ -1,4 +1,5 @@
 #include "F446RE/delay.h"
+#include "F446RE/io_memory_map/stk.h"
 
 /*
  * Delays a given number of microseconds.
@@ -8,6 +9,7 @@ void delay_us(int t_us)
 {
 	//Ensure Counter is off
 	*(STK_CTRL) &= ~(1<<STK_ENABLE_F);
+
 	//t_ms time
 	for (uint32_t i=0; i<t_us; i++)
 	{
@@ -33,6 +35,7 @@ void delay_ms(int t_ms)
 {
 	//Ensure Counter is off
 	*(STK_CTRL) &= ~(1<<STK_ENABLE_F);
+
 	//t_ms time
 	for (uint32_t i=0; i<t_ms; i++)
 	{
