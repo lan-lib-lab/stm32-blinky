@@ -4,7 +4,7 @@
 #define MACRO_STR(X) STRINGIFY(X)
 #define STR(X) #X
 
-extern void trap_error(int);
+extern void trap_error(unsigned char);
 
 // options 
 #define ERROR_RETURN_LOG_DISABLE

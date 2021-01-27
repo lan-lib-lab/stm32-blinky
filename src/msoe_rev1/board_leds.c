@@ -22,6 +22,7 @@ BoardLEDs_Error board_leds_init(led_bitset_t leds) {
               return BOARD_LEDS_ERROR_INTERNAL_GPIO;
 
             gpio_status = gpio_set_mode(&board_leds_pins[bit], IO_GPIO_MODE_OUTPUT);
+            /* gpio_status = gpio_set_mode(&board_leds_pins[bit], 99); */
             if (gpio_status != GPIO_OK) 
               return BOARD_LEDS_ERROR_INTERNAL_GPIO;
 
@@ -78,4 +79,35 @@ BoardLEDs_Error board_leds_clear(led_bitset_t leds) {
     }
     
     return BOARD_LEDS_OK;
+}
+
+void user_button_init(void) {
+  int retcode;
+  int val;
+
+  if ((retcode = gpio_clock_enable(USER_BUTTON.port, true)) != GPIO_OK)
+    trap_error(TRAP_ERROR_BOARD_LEDS | retcode);
+  if ((retcode = gpio_set_mode(&USER_BUTTON, IO_GPIO_MODE_INPUT)) != GPIO_OK)
+    trap_error(TRAP_ERROR_BOARD_LEDS | retcode);
+}
+
+bool user_button_pushed(void) {
+  int retcode;
+  int val;
+
+  if ((retcode = gpio_input(&USER_BUTTON, &val)) != GPIO_OK)
+    trap_error(TRAP_ERROR_BOARD_LEDS | retcode);
+
+  // active low
+  return !val;
+}
+
+void wait_push_user_button(void) {
+  int retcode;
+  int val;
+
+  user_button_init();
+
+  while (!user_button_pushed()) {}
+  while (user_button_pushed()) {}
 }

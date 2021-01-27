@@ -4,6 +4,9 @@
 #include "F446RE/io_memory_map.h"
 #include "F446RE/io_memory_map/gpio.h"
 
+// forward define
+GPIO_Error _validate_and_get_gpio(const GPIO_Pin *pin, volatile IO_GPIO_t **gpiox);
+
 GPIO_Error gpio_clock_enable(GPIO_Port port, bool en) {
     #define SET_GPIO_CLOCK(bitfield, en) do{\
         IO_RCC->AHB1ENR &= ~(bitfield);\
@@ -93,3 +96,48 @@ GPIO_Error gpio_set_mode(const GPIO_Pin *pin, IO_GPIO_MODE mode) {
     return GPIO_OK;
 }
 
+GPIO_Error gpio_output_high(const GPIO_Pin *pin) {
+    volatile IO_GPIO_t *gpiox = NULL;
+    GPIO_Error status;
+    if ((status = _validate_and_get_gpio(pin, &gpiox)) != GPIO_OK)
+      return status;
+
+    gpiox->ODR |= (1 << pin->pin);
+    return GPIO_OK;
+}
+
+GPIO_Error gpio_output_low(const GPIO_Pin *pin) {
+    volatile IO_GPIO_t *gpiox = NULL;
+    GPIO_Error status;
+    if ((status = _validate_and_get_gpio(pin, &gpiox)) != GPIO_OK)
+      return status;
+
+    gpiox->ODR &= ~(1 << pin->pin);
+    return GPIO_OK;
+}
+
+GPIO_Error gpio_input(const GPIO_Pin *pin, int *val) {
+    volatile IO_GPIO_t *gpiox = NULL;
+    GPIO_Error status;
+    if ((status = _validate_and_get_gpio(pin, &gpiox)) != GPIO_OK)
+      return status;
+
+    *val = (gpiox->IDR & (1 << pin->pin)) != 0;
+
+    return GPIO_OK;
+}
+
+/// validates that the pin is within range and that
+/// the port is valid. 
+/// Writes to `gpiox` if GPIO_OK
+GPIO_Error _validate_and_get_gpio(const GPIO_Pin *pin, volatile IO_GPIO_t **gpiox) {
+    if (pin->pin > PINS_PER_GPIO-1) 
+      return GPIO_ERROR_INVALID_PIN;
+
+    GPIO_Error status;
+
+    if ((status = gpio_from_port(gpiox, pin->port)) != GPIO_OK) 
+      return status;
+
+    return GPIO_OK;
+}

@@ -45,8 +45,6 @@
 *****************************************************************************
 */
 
-#if 0
-
 /* Includes */
 #include <errno.h>
 #include <stdio.h>
@@ -81,5 +79,3 @@ caddr_t _sbrk(int incr)
 
 	return (caddr_t) prev_heap_end;
 }
-
-#endif

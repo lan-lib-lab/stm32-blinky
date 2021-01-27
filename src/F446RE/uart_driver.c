@@ -4,7 +4,7 @@
  *  Created on: Nov 8, 2016
  *      Author: barnekow
  */
-#if 0
+
 #include "F446RE/uart_driver.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -48,11 +48,12 @@ void init_usart2(uint32_t baud, uint32_t sysclk){
 	*(USART_CR1) = (1<<UE)|(1<<TE)|(1<<RE); // Enable UART, Tx and Rx
 	*(USART_CR2) = 0;  // This is the default, but do it anyway
 	*(USART_CR3) = 0;  // This is the default, but do it anyway
-	*(USART_BRR) = sysclk/baud;
+  *(USART_BRR) = sysclk/baud;
+  /* *(USART_BRR) = 16000000/115200; */
+  /* *(USART_BRR) = 138; */
 
 	/* I'm not sure if this is needed for standard IO*/
 	 //setvbuf(stderr, NULL, _IONBF, 0);
 	 //setvbuf(stdin, NULL, _IONBF, 0);
-	 setvbuf(stdout, NULL, _IONBF, 0);
+   setvbuf(stdout, NULL, _IONBF, 0);
 }
-#endif

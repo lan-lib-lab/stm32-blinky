@@ -2,3 +2,4 @@
 gcc
 -Wno_main
 -Iinc
+-D TEST_MODE

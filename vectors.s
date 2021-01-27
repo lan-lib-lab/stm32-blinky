@@ -333,11 +333,67 @@ _start:
 
 .thumb_func
 Reset_Handler:
-  bl main
-  b done
+// enable floating point - added by DER
+	# CPACR is located at address 0xE000ED88
+	LDR     R0, =0xE000ED88
+	# Read CPACR
+	LDR R1, [R0]
+	# Set bits 20-23 to enable CP10 and CP11 coprocessors
+	 #ORR R1, R1, #(0xF << 20)
+  LDR     R2, =0x00F00000
+  ORR     R1, R1, R2
+	# Write back the modified value to the CPACR
+	STR R1, [R0] // wait for store to complete
+	DSB
+	# reset pipeline now the FPU is enabled
+	ISB
+
+/* Copy the data segment initializers from flash to SRAM */
+  movs	r1, #0
+  b	LoopCopyDataInit
+
+CopyDataInit:
+	ldr	r3, =_sidata
+	ldr	r3, [r3, r1]
+	str	r3, [r0, r1]
+	add	r1, r1, #4
+
+LoopCopyDataInit:
+	ldr	r0, =_sdata
+	ldr	r3, =_edata
+	add	r2, r0, r1
+	cmp	r2, r3
+	bcc	CopyDataInit
+	ldr	r2, =_sbss
+	b	LoopFillZerobss
+/* Zero fill the bss segment. */
+FillZerobss:
+	mov  r3, #0
+ 	str  r3, [r2]
+	add  r2, r2, #4
+
+LoopFillZerobss:
+	ldr	r3, = _ebss
+	cmp	r2, r3
+	bcc	FillZerobss
+
+/* Call the clock system intitialization function.*/
+    bl  SystemInit
+/* Call static constructors */
+    bl __libc_init_array
+/* Call the application's entry point.*/
+	bl	main
+
+LoopForever:
+    b LoopForever
+
+.size	Reset_Handler, .-Reset_Handler
+
 
 .thumb_func
 Default_Handler:
+  mov r0, #1
+  bl trap_error
   b done
 
 done:

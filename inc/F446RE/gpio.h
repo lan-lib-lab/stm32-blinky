@@ -4,12 +4,17 @@
 #include <stdbool.h>
 #include "mini_inttypes.h"
 #include "io_memory_map.h"
+#include "trap_error.h"
 
 #define PINS_PER_GPIO 16
 
 typedef enum {
     GPIO_OK,
-    GPIO_ERROR_INVALID_PORT,
+    GPIO_ERROR_INVALID_PORT
+#ifdef TRAP_ERROR_GPIO
+        = TRAP_ERROR_GPIO
+#endif
+    ,
     GPIO_ERROR_INVALID_PIN,
     GPIO_ERROR_INVALID_MODE,
 }GPIO_Error;
@@ -56,6 +61,31 @@ GPIO_Error gpio_from_port(volatile IO_GPIO_t **out, GPIO_Port port);
 ///      || GPIO_ERROR_INVALID_PIN
 ///      || GPIO_ERROR_INVALID_MODE
 GPIO_Error gpio_set_mode(const GPIO_Pin *pin, IO_GPIO_MODE mode);
+
+/// Sets `pin` to 1
+/// Expects mode to already be set
+/// @param[in]  pin     The pin to output. Ex. PIN_A5
+/// @return GPIO_OK
+///      || GPIO_ERROR_INVALID_PORT
+///      || GPIO_ERROR_INVALID_PIN
+GPIO_Error gpio_output_high(const GPIO_Pin *pin);
+
+/// Sets `pin` to 0
+/// Expects mode to already be set
+/// @param[in]  pin     The pin to output. Ex. PIN_A5
+/// @return GPIO_OK
+///      || GPIO_ERROR_INVALID_PORT
+///      || GPIO_ERROR_INVALID_PIN
+GPIO_Error gpio_output_low(const GPIO_Pin *pin);
+
+/// Gets value of `pin` and outputs it to `val`
+/// Expects mode to already be set
+/// @param[in]  pin     The pin to input. Ex. PIN_B2
+/// @param[out] val     Read value is stored in val
+/// @return GPIO_OK
+///      || GPIO_ERROR_INVALID_PORT
+///      || GPIO_ERROR_INVALID_PIN
+GPIO_Error gpio_input(const GPIO_Pin *pin, int *val);
 
 // all valid pins
 #define PIN_A0 ((GPIO_Pin) {GPIO_PORT_A, 0})

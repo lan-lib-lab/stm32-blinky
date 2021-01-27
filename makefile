@@ -24,12 +24,14 @@ CFLAGS_INCLUDE_LIB_HEADERS = -Iinc $(patsubst %, -I%, $(dir $(wildcard libs/*/))
 	-I"/usr/arm-none-eabi/lib/"
 LDFLAGS_INCLUDE_LIB_DIRS = -Llibs $(patsubst %, -L%, $(dir $(wildcard libs/*/)))
 
-CFLAGS = $(strip -Wall -Wno-main -mthumb $(CFLAGS_INCLUDE_LIB_HEADERS))
-LDFLAGS = $(strip $(LDFLAGS_INCLUDE_LIB_DIRS) $(libs))
+# MCU_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+MCU_FLAGS = -mthumb -mcpu=cortex-m4
+CFLAGS = $(strip -Wall -Wno-main $(MCU_FLAGS) $(CFLAGS_INCLUDE_LIB_HEADERS))
+LDFLAGS = $(strip $(LDFLAGS_INCLUDE_LIB_DIRS) $(MCU_FLAGS) $(libs))
 
 # for testing, enable conditional compilation macro
 ifeq ($(MAKECMDGOALS), test)
-	CFLAGS += -D TEST_MODE_ENABLED
+	CFLAGS += -D TEST_MODE
 endif
 
 # add debug flags for debug target
@@ -44,8 +46,8 @@ all: build
 .PHONY: build
 build: build_vectors $(obj)
 	@mkdir -p build/
-	# $(CC) -nostartfiles -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
-	$(LD)  -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
+	$(CC) -nostartfiles -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
+	# $(LD)  -T flash.ld $(LDFLAGS) build/obj/vectors.o $(obj) -o build/$(PROG).elf
 	$(OBJDUMP) -D build/$(PROG).elf > build/$(PROG).lst
 	$(OBJCOPY) build/$(PROG).elf -O binary build/$(PROG).bin
 
@@ -57,7 +59,7 @@ debug: build
 
 .PHONY: build_vectors
 build_vectors:
-	$(AS) vectors.s -o build/obj/vectors.o
+	$(AS) $(MCU_FLAGS) vectors.s -o build/obj/vectors.o
 
 .PHONY: clean
 clean:

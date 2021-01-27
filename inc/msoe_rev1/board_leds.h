@@ -2,10 +2,13 @@
 #define BOARD_LEDS_H
 
 #include "F446RE/gpio.h"
+#include "trap_error.h"
+
+#define USER_BUTTON PIN_C13
 
 typedef enum {
     BOARD_LEDS_OK,
-    BOARD_LEDS_ERROR_OUT_OF_BOUNDS, 
+    BOARD_LEDS_ERROR_OUT_OF_BOUNDS,
     BOARD_LEDS_ERROR_INTERNAL_GPIO, 
 }BoardLEDs_Error;
 
@@ -33,6 +36,15 @@ BoardLEDs_Error board_leds_set(led_bitset_t leds);
 ///      || BOARD_LEDS_OUT_OF_BOUNDS
 ///      || BOARD_LEDS_ERROR_INTERNAL_GPIO
 BoardLEDs_Error board_leds_clear(led_bitset_t leds);
+
+/// init the user button so that it can be checked
+void user_button_init(void);
+
+/// check if the user button is currently active
+bool user_button_pushed(void);
+
+/// poll until the user button is pressed
+void wait_push_user_button(void);
 
 #endif // BOARD_LEDS_H
 

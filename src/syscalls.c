@@ -50,8 +50,6 @@
  * 	3. Commented out lines from original implementation
  */
 
-#if 0
-
 /* Includes */
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -75,6 +73,8 @@ register char * stack_ptr asm("sp");
 char *__env[1] = { 0 };
 char **environ = __env;
 
+
+void _init(void) {} // added to remove _init does not exist problem
 
 /* Functions */
 void initialise_monitor_handles()
@@ -222,4 +222,3 @@ int _execve(char *name, char **argv, char **env)
 	errno = ENOMEM;
 	return -1;
 }
-#endif
